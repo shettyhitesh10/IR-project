@@ -12,19 +12,19 @@ import functools
 import operator 
 import re, string, unicodedata
 import nltk
-import inflect
 from nltk import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
+import inflect 
 from nltk.stem import LancasterStemmer, WordNetLemmatizer
 from pprint import pprint
 # We use a corpus of four documents.  Each document has an id, and
 # these are the keys in the following dict.  The values are the
 # corresponding filenames.
-directory = 'D:/IR/Plagiarism Checker/documents'
+directory = 'C:/Users/Lenovo/Desktop/Ir project/corpus-20090418'
 document_filenames = {}
 i =0 
 for filename in os.listdir(directory):
-    document_filenames[i] = "documents/"+filename
+    document_filenames[i] = "corpus-20090418/"+filename
     i+=1
 
 
@@ -60,7 +60,7 @@ length = defaultdict(float)
 
 # The list of characters (mostly, punctuation) we want to strip out of
 # terms in the document.
-characters = " .,!#$%^&*();:\n\t\\\"?!{}[]<>"
+characters = " .,!#$%^&*();:\n\t\\\"\'?!{}[]<>"
 
 def main():
     initialize_terms_and_postings()
