@@ -35,18 +35,18 @@ N = len(document_filenames)
 # corpus.
 dictionary = set()
 
-# postings: a defaultdict whose keys are terms, and whose
-# corresponding values are the so-called "postings list" for that
-# term, i.e., the list of documents the term appears in.
-#
-# The way we implement the postings list is actually not as a Python
-# list.  Rather, it's as a dict whose keys are the document ids of
-# documents that the term appears in, with corresponding values equal
-# to the frequency with which the term occurs in the document.
-#
-# As a result, postings[term] is the postings list for term, and
-# postings[term][id] is the frequency with which term appears in
-# document id.
+                                # postings: a defaultdict whose keys are terms, and whose
+                                # corresponding values are the so-called "postings list" for that
+                                # term, i.e., the list of documents the term appears in.
+                                #
+                                # The way we implement the postings list is actually not as a Python
+                                # list.  Rather, it's as a dict whose keys are the document ids of
+                                # documents that the term appears in, with corresponding values equal
+                                # to the frequency with which the term occurs in the document.
+                                #
+                                # As a result, postings[term] is the postings list for term, and
+                                # postings[term][id] is the frequency with which term appears in
+                                # document id.
 postings = defaultdict(dict)
 
 # document_frequency: a defaultdict whose keys are terms, with
@@ -63,13 +63,13 @@ length = defaultdict(float)
 characters = " .,!#$%^&*();:\n\t\\\"\'?!{}[]<>"
 
 def main():
-    initialize_terms_and_postings()
-    initialize_document_frequencies()
-    initialize_lengths()
+    get_terms_and_postings()
+    get_document_frequencies()
+    get_lengths()
     while True:
         do_search()
 
-def initialize_terms_and_postings():
+def get_terms_and_postings():
     """Reads in each document in document_filenames, splits it into a
     list of terms (i.e., tokenizes it), adds new terms to the global
     dictionary, and adds the document to the posting list for each
@@ -81,7 +81,7 @@ def initialize_terms_and_postings():
         document = f.read()
         f.close()
         terms = tokenize(document)
-        terms = normalize(terms)
+        terms = preprocess(terms)
         unique_terms = set(terms)
         dictionary = dictionary.union(unique_terms)
         for term in unique_terms:
@@ -143,7 +143,7 @@ def remove_non_ascii(words):
         new_word = unicodedata.normalize('NFKD', word).encode('ascii', 'ignore').decode('utf-8', 'ignore')
         new_words.append(new_word)
     return new_words
-def normalize(words):
+def preprocess(words):
     words = remove_non_ascii(words)
     words = remove_punctuation(words)
     words = replace_numbers(words)
@@ -162,14 +162,14 @@ def tokenize(document):
     terms = document.lower().split()
     return [term.strip(characters) for term in terms]
 
-def initialize_document_frequencies():
+def get_document_frequencies():
     """For each term in the dictionary, count the number of documents
     it appears in, and store the value in document_frequncy[term]."""
     global document_frequency
     for term in dictionary:
         document_frequency[term] = len(postings[term])
 
-def initialize_lengths():
+def get_lengths():
     """Computes the length for each document."""
     global length
     for id in document_filenames:
@@ -199,17 +199,19 @@ def do_search():
     list of relevant documents, in decreasing order of cosine
     similarity."""
     inp = input("Filename >> ")
-    if inp == []:
+    if inp == "":
         sys.exit()
+    inp = 'corpus-20090418/'+inp+'.txt'
     # find document ids containing all query terms.  Works by
     # intersecting the posting lists for all query terms.
     f = open(inp,'r',encoding="utf-8",errors="ignore")
     query = tokenize(f.read())
-    query=normalize(query)
+    query=preprocess(query)
     f.close()
-    pprint(postings)
+    #pprint(postings)
     relevant_document_ids = union(
             [set(postings[term].keys()) for term in query])
+    print([(id,similarity(query,id)) for id in relevant_document_ids])
     if not relevant_document_ids:
         print ("No documents matched all query terms.")
     else:
@@ -217,9 +219,11 @@ def do_search():
                          for id in relevant_document_ids],
                         key=lambda x: x[1],
                         reverse=True)
-        print ("Score: filename")
+        print ("Rankings : Filename : Score")
         for (id,score) in scores:
-            print (document_filenames[id]+":"+str(score))
+            rank=1
+            print (rank," : "+document_filenames[id][16:]+" : %.2f"%(score))#spliced the document name as it contained part of its address too
+            rank+=1
 
 def union(sets):
     """Returns the intersection of all sets in the list sets. Requires
